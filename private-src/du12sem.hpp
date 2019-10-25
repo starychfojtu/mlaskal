@@ -23,6 +23,8 @@ using namespace std;
 namespace mlc {
 
 	string ascii_to_upper(const string s);
+
+	int str_to_int(const string s);
 }
 
 #endif

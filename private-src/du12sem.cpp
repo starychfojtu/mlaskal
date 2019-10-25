@@ -27,6 +27,19 @@ namespace mlc {
 		}
 		return result;
 	}
+
+	static int char_to_digit(const char c) {
+		return (int)(c - '0');
+	}
+
+	int str_to_int(const string s)
+	{
+		int result = 0;
+		for (auto c : s) {
+			result = 10 * result + char_to_digit(c);
+		}
+		return result;
+	}
 };
 
 /*****************************************/

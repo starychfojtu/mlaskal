@@ -285,7 +285,9 @@ EREALPART([eE][+-]?[0-9]+)
 						}
 
 {UINT}		{
-			    return parser::make_UINT(mlc::ls_int_index(), ctx->curline);
+				auto number = mlc::str_to_int(yytext);
+				auto number_index = ctx->tab->ls_int().add(number);
+			    return parser::make_UINT(number_index, ctx->curline);
 			}
 
 {UINT}((\.{UINT}{EREALPART}?)|{EREALPART})		{
