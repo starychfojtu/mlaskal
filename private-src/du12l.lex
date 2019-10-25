@@ -233,7 +233,9 @@ EREALPART([eE][+-]?[0-9]+)
 													return parser::make_REAL(mlc::ls_real_index(), ctx->curline);
 												}
 
-\n					/* go out with new lines */
+\n		{
+			ctx->curline++;
+		}
 
 {WHITESPACE}+		/* go out with whitespaces */
 
