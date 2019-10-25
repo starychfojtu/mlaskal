@@ -291,7 +291,9 @@ EREALPART([eE][+-]?[0-9]+)
 			}
 
 {UINT}((\.{UINT}{EREALPART}?)|{EREALPART})		{
-													return parser::make_REAL(mlc::ls_real_index(), ctx->curline);
+													auto number = std::stod(yytext);
+													auto number_index = ctx->tab->ls_real().add(number);
+													return parser::make_REAL(number_index, ctx->curline);
 												}
 
 \n		{
