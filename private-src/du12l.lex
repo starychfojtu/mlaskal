@@ -14,6 +14,7 @@
 	// CHANGE THIS LINE TO #include "du3456g.hpp" WHEN THIS FILE IS COPIED TO du3456l.lex
 	#include "dummyg.hpp"
 	#include "du12sem.hpp"
+	#include<tuple>
 %}
 
 /* DO NOT TOUCH THIS OPTIONS! */
@@ -71,7 +72,7 @@ EREALPART([eE][+-]?[0-9]+)
 								comment_level++;
 							}
 
-<COMMENT>\}		{
+<INITIAL,COMMENT>\}		{
 					if (comment_level == 0) {
 						message(mlc::DUERR_UNEXPENDCMT, ctx->curline, *yytext, *yytext);
 					} else if (comment_level == 1) {
@@ -292,8 +293,15 @@ EREALPART([eE][+-]?[0-9]+)
 						}
 
 {UINT}		{
-				auto number = mlc::str_to_int(yytext);
+				auto result = mlc::str_to_int(yytext);
+				auto number = get<0>(result);
+				auto stripped = get<1>(result);
 				auto number_index = ctx->tab->ls_int().add(number);
+
+				if (stripped) {
+					message(mlc::DUERR_INTOUTRANGE, ctx->curline, yytext);
+				}
+
 			    return parser::make_UINT(number_index, ctx->curline);
 			}
 

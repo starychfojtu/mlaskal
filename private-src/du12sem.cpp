@@ -32,13 +32,18 @@ namespace mlc {
 		return (int)(c - '0');
 	}
 
-	int str_to_int(const string s)
+	tuple<int, bool> str_to_int(const string s)
 	{
 		int result = 0;
+		bool stripped = false;
 		for (auto c : s) {
-			result = 10 * result + char_to_digit(c);
+			int new_result = 10 * result + char_to_digit(c);
+			if (new_result <= result) {
+				stripped = true;
+			}
+			result = new_result;
 		}
-		return result;
+		return make_tuple(result, stripped);
 	}
 };
 

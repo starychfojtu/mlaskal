@@ -17,6 +17,7 @@
 #include "dutables.hpp"
 #include "abstract_instr.hpp"
 #include "gen_ainstr.hpp"
+#include<tuple>
 
 using namespace std;
 
@@ -24,7 +25,8 @@ namespace mlc {
 
 	string ascii_to_upper(const string s);
 
-	int str_to_int(const string s);
+	// Boolean indicates whether or not the value was stripped.
+	tuple<int, bool> str_to_int(const string s);
 }
 
 #endif
