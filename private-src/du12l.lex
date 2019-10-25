@@ -19,6 +19,8 @@
 %option noyywrap nounput batch noinput stack reentrant
 %option never-interactive
 
+%x STRING
+
 WHITESPACE[ \r\t\f]
 UINT[0-9]+
 EREALPART([eE][+-]?[0-9]+)
@@ -27,7 +29,36 @@ EREALPART([eE][+-]?[0-9]+)
 
 %{
 	typedef yy::mlaskal_parser parser;
+	std::string current_string;
 %}
+
+'		{
+			BEGIN(STRING);
+		}
+
+<STRING>[^\n'<<EOF>>]*		{
+								current_string += yytext;	
+							}
+
+<STRING>''		{
+					current_string += "'";
+				}
+
+<STRING><<EOF>>		{
+						message(mlc::DUERR_EOFINSTRCHR, ctx->curline, *yytext, *yytext);
+					}
+
+<STRING>\n		{
+					message(mlc::DUERR_EOLINSTRCHR, ctx->curline, *yytext, *yytext);
+				}
+
+<STRING>'		{
+					BEGIN(INITIAL);
+
+					auto str_index = ctx->tab->ls_str().add(current_string);
+					current_string = "";
+					return parser::make_STRING(str_index, ctx->curline);
+				}
 
 [pP][rR][oO][gG][rR][aA][mM]	{
 									return parser::make_PROGRAM(ctx->curline);
