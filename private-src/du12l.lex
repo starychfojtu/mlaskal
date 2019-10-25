@@ -53,8 +53,14 @@ EREALPART([eE][+-]?[0-9]+)
 					}
 
 <STRING>\n		{
+					BEGIN(INITIAL);
+
 					message(mlc::DUERR_EOLINSTRCHR, ctx->curline);
 					ctx->curline++;
+
+					auto str_index = ctx->tab->ls_str().add(current_string);
+					current_string = "";
+					return parser::make_STRING(str_index, ctx->curline);
 				}
 
 <STRING>'		{
