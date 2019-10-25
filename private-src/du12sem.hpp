@@ -18,9 +18,11 @@
 #include "abstract_instr.hpp"
 #include "gen_ainstr.hpp"
 
+using namespace std;
+
 namespace mlc {
 
-
+	string ascii_to_upper(const string s);
 }
 
 #endif

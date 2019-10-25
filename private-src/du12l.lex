@@ -13,6 +13,7 @@
 	// allow access to context 
 	// CHANGE THIS LINE TO #include "du3456g.hpp" WHEN THIS FILE IS COPIED TO du3456l.lex
 	#include "dummyg.hpp"
+	#include "du12sem.hpp"
 %}
 
 /* DO NOT TOUCH THIS OPTIONS! */
@@ -38,7 +39,7 @@ EREALPART([eE][+-]?[0-9]+)
 		}
 
 <STRING>[^\n'<<EOF>>]*		{
-								current_string += yytext;	
+								current_string += yytext;
 							}
 
 <STRING>''		{
@@ -278,7 +279,9 @@ EREALPART([eE][+-]?[0-9]+)
 							}
 
 [A-Za-z][A-Za-z0-9]*	{
-							return parser::make_IDENTIFIER(mlc::ls_id_index(), ctx->curline);
+							auto id = mlc::ascii_to_upper(yytext);
+							auto id_index = ctx->tab->ls_id().add(id);
+							return parser::make_IDENTIFIER(id_index, ctx->curline);
 						}
 
 {UINT}		{
