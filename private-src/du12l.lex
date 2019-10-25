@@ -48,6 +48,7 @@ EREALPART([eE][+-]?[0-9]+)
 
 <STRING><<EOF>>		{
 						message(mlc::DUERR_EOFINSTRCHR, ctx->curline, *yytext, *yytext);
+						return parser::make_EOF(ctx->curline);
 					}
 
 <STRING>\n		{
@@ -89,6 +90,7 @@ EREALPART([eE][+-]?[0-9]+)
 
 <COMMENT><<EOF>>	{
 						message(mlc::DUERR_EOFINCMT, ctx->curline, *yytext, *yytext);
+						return parser::make_EOF(ctx->curline);
 					}
 
 [pP][rR][oO][gG][rR][aA][mM]	{
