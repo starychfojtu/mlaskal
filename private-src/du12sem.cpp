@@ -28,6 +28,18 @@ namespace mlc {
 		return result;
 	}
 
+	string get_leading_number(const string s)
+	{
+		int first_non_digit_index = -1;
+		for (int i = 0; i < s.length(); i++) {
+			if (!isdigit(s[i])) {
+				first_non_digit_index = i;
+			}
+		}
+
+		return first_non_digit_index == -1 ? s : s.substr(0, first_non_digit_index);
+	}
+
 	static int char_to_digit(const char c) {
 		return (int)(c - '0');
 	}

@@ -26,6 +26,7 @@
 WHITESPACE[ \r\t\f]
 UINT[0-9]+
 EREALPART([eE][+-]?[0-9]+)
+IDENT([A-Za-z][A-Za-z0-9]*)
 
 %%
 
@@ -292,24 +293,31 @@ EREALPART([eE][+-]?[0-9]+)
 								return parser::make_FOR_DIRECTION(mlc::DUTOKGE_FOR_DIRECTION::DUTOKGE_DOWNTO, ctx->curline);
 							}
 
-[A-Za-z][A-Za-z0-9]*	{
-							auto id = mlc::ascii_to_upper(yytext);
-							auto id_index = ctx->tab->ls_id().add(id);
-							return parser::make_IDENTIFIER(id_index, ctx->curline);
+{IDENT}		{
+				auto id = mlc::ascii_to_upper(yytext);
+				auto id_index = ctx->tab->ls_id().add(id);
+				return parser::make_IDENTIFIER(id_index, ctx->curline);
+			}
+
+{UINT}{IDENT}?		{
+						auto corrected_input = mlc::get_leading_number(yytext);
+						std::cout << corrected_input;
+
+						if (corrected_input.length() != std::strlen(yytext)) {
+							message(mlc::DUERR_BADINT, ctx->curline, yytext);
 						}
 
-{UINT}		{
-				auto result = mlc::str_to_int(yytext);
-				auto number = get<0>(result);
-				auto stripped = get<1>(result);
-				auto number_index = ctx->tab->ls_int().add(number);
+						auto result = mlc::str_to_int(corrected_input);
+						auto number = get<0>(result);
+						auto stripped = get<1>(result);
+						auto number_index = ctx->tab->ls_int().add(number);
 
-				if (stripped) {
-					message(mlc::DUERR_INTOUTRANGE, ctx->curline, yytext);
-				}
+						if (stripped) {
+							message(mlc::DUERR_INTOUTRANGE, ctx->curline, yytext);
+						}
 
-			    return parser::make_UINT(number_index, ctx->curline);
-			}
+						return parser::make_UINT(number_index, ctx->curline);
+					}
 
 {UINT}((\.{UINT}{EREALPART}?)|{EREALPART})		{
 													auto number = std::stod(yytext);
