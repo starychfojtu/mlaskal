@@ -52,6 +52,7 @@ EREALPART([eE][+-]?[0-9]+)
 
 <STRING>\n		{
 					message(mlc::DUERR_EOLINSTRCHR, ctx->curline, *yytext, *yytext);
+					ctx->curline++;
 				}
 
 <STRING>'		{
@@ -78,6 +79,10 @@ EREALPART([eE][+-]?[0-9]+)
 					} else {
 						comment_level--;
 					}
+				}
+
+<COMMENT>\n		{
+					ctx->curline++;
 				}
 
 <COMMENT>[^\}\{<<EOF>>]		/* ignore comment content */
