@@ -19,7 +19,7 @@
 %option noyywrap nounput batch noinput stack reentrant
 %option never-interactive
 
-%x STRING
+%x STRING COMMENT
 
 WHITESPACE[ \r\t\f]
 UINT[0-9]+
@@ -30,6 +30,7 @@ EREALPART([eE][+-]?[0-9]+)
 %{
 	typedef yy::mlaskal_parser parser;
 	std::string current_string;
+	int comment_level = 0;
 %}
 
 '		{
@@ -59,6 +60,30 @@ EREALPART([eE][+-]?[0-9]+)
 					current_string = "";
 					return parser::make_STRING(str_index, ctx->curline);
 				}
+
+<INITIAL,COMMENT>\{		{
+								if (comment_level == 0) {
+									BEGIN(COMMENT);
+								}
+								comment_level++;
+							}
+
+<COMMENT>\}		{
+					if (comment_level == 0) {
+						message(mlc::DUERR_UNEXPENDCMT, ctx->curline, *yytext, *yytext);
+					} else if (comment_level == 1) {
+						BEGIN(INITIAL);
+						comment_level--;
+					} else {
+						comment_level--;
+					}
+				}
+
+<COMMENT>[^\}\{<<EOF>>]		/* ignore comment content */
+
+<COMMENT><<EOF>>	{
+						message(mlc::DUERR_EOFINCMT, ctx->curline, *yytext, *yytext);
+					}
 
 [pP][rR][oO][gG][rR][aA][mM]	{
 									return parser::make_PROGRAM(ctx->curline);
