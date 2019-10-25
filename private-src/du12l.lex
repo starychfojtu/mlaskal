@@ -48,12 +48,12 @@ EREALPART([eE][+-]?[0-9]+)
 				}
 
 <STRING><<EOF>>		{
-						message(mlc::DUERR_EOFINSTRCHR, ctx->curline, *yytext, *yytext);
+						message(mlc::DUERR_EOFINSTRCHR, ctx->curline);
 						return parser::make_EOF(ctx->curline);
 					}
 
 <STRING>\n		{
-					message(mlc::DUERR_EOLINSTRCHR, ctx->curline, *yytext, *yytext);
+					message(mlc::DUERR_EOLINSTRCHR, ctx->curline);
 					ctx->curline++;
 				}
 
@@ -74,7 +74,7 @@ EREALPART([eE][+-]?[0-9]+)
 
 <INITIAL,COMMENT>\}		{
 					if (comment_level == 0) {
-						message(mlc::DUERR_UNEXPENDCMT, ctx->curline, *yytext, *yytext);
+						message(mlc::DUERR_UNEXPENDCMT, ctx->curline);
 					} else if (comment_level == 1) {
 						BEGIN(INITIAL);
 						comment_level--;
@@ -90,7 +90,7 @@ EREALPART([eE][+-]?[0-9]+)
 <COMMENT>[^\}\{<<EOF>>]		/* ignore comment content */
 
 <COMMENT><<EOF>>	{
-						message(mlc::DUERR_EOFINCMT, ctx->curline, *yytext, *yytext);
+						message(mlc::DUERR_EOFINCMT, ctx->curline);
 						return parser::make_EOF(ctx->curline);
 					}
 
