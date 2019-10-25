@@ -301,7 +301,6 @@ IDENT([A-Za-z][A-Za-z0-9]*)
 
 {UINT}{IDENT}?		{
 						auto corrected_input = mlc::get_leading_number(yytext);
-						std::cout << corrected_input;
 
 						if (corrected_input.length() != std::strlen(yytext)) {
 							message(mlc::DUERR_BADINT, ctx->curline, yytext);
