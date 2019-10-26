@@ -15,6 +15,7 @@
 	#include "dummyg.hpp"
 	#include "du12sem.hpp"
 	#include<tuple>
+	#include<cstdlib>
 %}
 
 /* DO NOT TOUCH THIS OPTIONS! */
@@ -56,12 +57,14 @@ IDENT([A-Za-z][A-Za-z0-9]*)
 <STRING>\n		{
 					BEGIN(INITIAL);
 
-					message(mlc::DUERR_EOLINSTRCHR, ctx->curline);
+					auto cur_line = ctx->curline;
 					ctx->curline++;
 
+					message(mlc::DUERR_EOLINSTRCHR, cur_line);
+					
 					auto str_index = ctx->tab->ls_str().add(current_string);
 					current_string = "";
-					return parser::make_STRING(str_index, ctx->curline);
+					return parser::make_STRING(str_index, cur_line);
 				}
 
 <STRING>'		{
@@ -318,11 +321,21 @@ IDENT([A-Za-z][A-Za-z0-9]*)
 						return parser::make_UINT(number_index, ctx->curline);
 					}
 
-{UINT}((\.{UINT}{EREALPART}?)|{EREALPART})		{
-													auto number = std::stod(yytext);
-													auto number_index = ctx->tab->ls_real().add(number);
-													return parser::make_REAL(number_index, ctx->curline);
-												}
+{UINT}((\.{UINT}{EREALPART}?)|{EREALPART}){IDENT}?		{
+															char* malformed_part;
+															auto number = strtod(yytext, &malformed_part);
+															auto number_index = ctx->tab->ls_real().add(number);
+
+															if (*malformed_part != '\0' || number == 0.0) {
+																message(mlc::DUERR_BADREAL, ctx->curline, yytext);
+															}
+
+															if (number == HUGE_VAL || number == -HUGE_VAL) {
+																message(mlc::DUERR_REALOUTRANGE, ctx->curline, yytext);
+															}
+
+															return parser::make_REAL(number_index, ctx->curline);
+														}
 
 \n		{
 			ctx->curline++;
