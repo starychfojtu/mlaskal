@@ -16,6 +16,7 @@
 	#include "du12sem.hpp"
 	#include<tuple>
 	#include<cstdlib>
+	#include<cmath>
 %}
 
 /* DO NOT TOUCH THIS OPTIONS! */
@@ -305,7 +306,7 @@ IDENT([A-Za-z][A-Za-z0-9]*)
 {UINT}{IDENT}?		{
 						auto corrected_input = mlc::get_leading_number(yytext);
 
-						if (corrected_input.length() != std::strlen(yytext)) {
+						if (corrected_input.length() != strlen(yytext)) {
 							message(mlc::DUERR_BADINT, ctx->curline, yytext);
 						}
 

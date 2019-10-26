@@ -18,6 +18,8 @@
 #include "abstract_instr.hpp"
 #include "gen_ainstr.hpp"
 #include<tuple>
+#include<cmath>
+#include<cstdlib>
 
 using namespace std;
 

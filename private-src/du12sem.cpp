@@ -12,6 +12,7 @@ Mlaskal's semantic interface for DU1-2
 #include "du12sem.hpp"
 #include "duerr.hpp"
 #include <cstdlib>
+#include<cmath>
 
 using namespace std;
 
