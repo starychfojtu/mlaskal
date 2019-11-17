@@ -17,10 +17,19 @@
 #include "dutables.hpp"
 #include "abstract_instr.hpp"
 #include "gen_ainstr.hpp"
+#include<tuple>
+#include<cmath>
+#include<cstdlib>
+
+using namespace std;
 
 namespace mlc {
+	string ascii_to_upper(const string s);
 
+	string get_leading_number(const string s);
 
+	// Boolean indicates whether or not the value was stripped.
+	tuple<int, bool> str_to_int(const string s);
 }
 
 #endif
