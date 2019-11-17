@@ -197,17 +197,13 @@ identifiercycle: IDENTIFIER
 			   | identifiercycle COMMA IDENTIFIER
 		       ;
 
-fieldlist: identifiercycle COLON type
-		 | identifiercycle COLON type SEMICOLON fieldlist
+fieldlist: identifiercycle COLON type SEMICOLON fieldlist
+		 | identifiercycle COLON type
+		 | %empty
 	     ;
 
-recordbody: %empty
-		  | fieldlist
-		  | fieldlist SEMICOLON
-		  ;
-
 type: IDENTIFIER /* ordinal type OR type OR structured type */
-    | RECORD recordbody END
+    | RECORD fieldlist END
 	;
 
 /* BLOCK */
