@@ -194,27 +194,27 @@ type: IDENTIFIER /* ordinal type OR type OR structured type */
 
 /* BLOCK */
 
-blocklabelcycle: COLON UINT blocklabelcycle
-				| %empty
-				;
+blocklabelcycle: UINT COLON blocklabelcycle
+			   | UINT
+			   ;
 
-blocklabel: LABEL UINT blocklabelcycle SEMICOLON
+blocklabel: LABEL blocklabelcycle SEMICOLON
 	  | %empty
 	  ;
 
-blockconstcycle: IDENTIFIER EQ constant SEMICOLON blockconstcycle
-			   | %empty
+blockconstcycle: IDENTIFIER EQ constant SEMICOLON
+			   | IDENTIFIER EQ constant SEMICOLON blockconstcycle
 			   ;
 
-blockconst: CONST IDENTIFIER EQ constant SEMICOLON blockconstcycle
+blockconst: CONST blockconstcycle
 		  | %empty
 		  ;
 
-blocktypecycle: TYPE IDENTIFIER EQ type SEMICOLON blocktypecycle
-			   | %empty
+blocktypecycle: IDENTIFIER EQ type SEMICOLON
+			   | IDENTIFIER EQ type SEMICOLON blocktypecycle
 			   ;
 
-blocktype: TYPE IDENTIFIER EQ type SEMICOLON blocktypecycle
+blocktype: TYPE blocktypecycle
 		 | %empty
 		 ;
 
