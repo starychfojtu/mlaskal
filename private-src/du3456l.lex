@@ -97,7 +97,7 @@ IDENT([A-Za-z][A-Za-z0-9]*)
 					ctx->curline++;
 				}
 
-<COMMENT>[^\}\{<<EOF>>]		/* ignore comment content */
+<COMMENT>[^\}\{]		/* ignore comment content */
 
 <COMMENT><<EOF>>	{
 						message(mlc::DUERR_EOFINCMT, ctx->curline);
