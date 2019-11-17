@@ -123,13 +123,12 @@ constant: uconstant
 
 realparameters: expression
 			  | expression COMMA realparameters
-			  | IDENTIFIER /* variable */ COMMA realparameters
 			  ;
 
 factor: UINT /* uconstant inlining */
 	  | REAL /* uconstant inlining */
 	  | STRING /* uconstant inlining */
-      | IDENTIFIER /* variable OR function OR uconstant inlining */ 
+      | IDENTIFIER /* variable OR function OR uconstant inlining */
 	  | IDENTIFIER /* function */ LPAR realparameters RPAR
 	  | LPAR expression RPAR
 	  | NOT factor
