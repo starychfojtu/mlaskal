@@ -193,14 +193,12 @@ statement: statementlabel statementbody
 
 /* TYPE */
 
-fieldlistidentifiercycle: COMMA IDENTIFIER fieldlistidentifiercycle
-						| %empty
-						;
-fieldlistcycle: SEMICOLON IDENTIFIER fieldlistidentifiercycle COLON type fieldlistcycle
-			  | %empty
-			  ;
+identifiercycle: IDENTIFIER 
+			   | identifiercycle COMMA IDENTIFIER
+		       ;
 
-fieldlist: IDENTIFIER fieldlistidentifiercycle COLON type fieldlistcycle
+fieldlist: identifiercycle COLON type
+		 | identifiercycle COLON type SEMICOLON fieldlist
 	     ;
 
 recordbody: %empty
