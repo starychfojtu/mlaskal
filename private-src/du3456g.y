@@ -157,24 +157,42 @@ statementlabel: UINT COLON
 			  | %empty
 			  ;
 
-statementcycle: statement SEMICOLON statementcycle
+statementacycle: statementa SEMICOLON statementacycle
 			  | %empty
 			  ;
 
-statementbody: IDENTIFIER DOT IDENTIFIER /* record.property (record access) */ ASSIGN expression
-			 | IDENTIFIER /* function OR variable */ ASSIGN expression
-			 | IDENTIFIER /* procedure */ functioninvocation
-			 | GOTO UINT
-			 | BEGIN statementcycle END
-			 | IF expression /* boolean */ THEN statement 
-			 | IF expression /* boolean */ THEN statement ELSE statement
-			 | WHILE expression /* boolean */ DO statement
-			 | REPEAT statementcycle UNTIL expression /* boolean */
-			 | FOR IDENTIFIER /* ordinal type */ ASSIGN expression /* ordinal */ FOR_DIRECTION expression /* ordinal */ DO statement
-			 | %empty
-			 ;
+statementbodya: IDENTIFIER DOT IDENTIFIER /* record.property (record access) */ ASSIGN expression
+			  | IDENTIFIER /* function OR variable */ ASSIGN expression
+			  | IDENTIFIER /* procedure */ functioninvocation
+			  | GOTO UINT
+			  | BEGIN statementacycle END
+			  | IF expression /* boolean */ THEN statementa ELSE statementa
+			  | WHILE expression /* boolean */ DO statementa
+			  | REPEAT statementacycle UNTIL expression /* boolean */
+			  | FOR IDENTIFIER /* ordinal type */ ASSIGN expression /* ordinal */ FOR_DIRECTION expression /* ordinal */ DO statementa
+			  | %empty
+			  ;
 
-statement: statementlabel statementbody
+statementbcycle: statementb SEMICOLON statementbcycle
+			   | statementb
+			   ;
+
+statementbodyb: BEGIN statementbcycle END
+			  | IF expression /* boolean */ THEN statement
+			  | IF expression /* boolean */ THEN statementa ELSE statementb
+			  | WHILE expression /* boolean */ DO statementb
+			  | REPEAT statementbcycle UNTIL expression /* boolean */
+			  | FOR IDENTIFIER /* ordinal type */ ASSIGN expression /* ordinal */ FOR_DIRECTION expression /* ordinal */ DO statementb
+			  ;
+
+statementa: statementlabel statementbodya
+		  ;
+
+statementb: statementlabel statementbodyb
+		  ;
+
+statement: statementa
+		 | statementb
 		 ;
 
 /* TYPE */
