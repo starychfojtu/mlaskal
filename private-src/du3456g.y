@@ -114,10 +114,6 @@ uconstant: IDENTIFIER /* constant identifier */
 		 | STRING
 		 ;
 
-optionalsignadd: OPER_SIGNADD
-			   | %empty
-			   ;
-
 constant: uconstant
 	    | OPER_SIGNADD UINT
 		| OPER_SIGNADD REAL
@@ -125,13 +121,10 @@ constant: uconstant
 
 /* EXPRESSION */
 
-realparameterscycle: COMMA expression realparameterscycle
-				   | COMMA IDENTIFIER /* variable */ realparameterscycle
-				   | %empty
-				   ;
-
-realparameters: expression realparameterscycle
-			  | IDENTIFIER /* variable */ realparameterscycle
+realparameters: expression
+			  | expression COMMA realparameters
+			  | IDENTIFIER /* variable */
+			  | IDENTIFIER /* variable */ COMMA realparameters
 			  ;
 
 functioninvocation: %empty
@@ -147,21 +140,16 @@ factor: UINT /* uconstant inlining */
 	  | NOT factor
 	  ;
 
-termcycle: OPER_MUL factor termcycle
-		 | %empty
-		 ;
+term: factor
+	| factor OPER_MUL term
 
-term: factor termcycle
-
-simpleexressioncycle: OPER_SIGNADD term simpleexressioncycle
-					| OR term simpleexressioncycle
-					| %empty
-					;
-
-simpleexpression: optionalsignadd term simpleexressioncycle
+simpleexpression: term 
+				| term OPER_SIGNADD simpleexpression
+				| term OR simpleexpression
 				;
 
 expression: simpleexpression
+		  | OPER_SIGNADD simpleexpression
 		  | simpleexpression OPER_REL simpleexpression
 		  ;
 
