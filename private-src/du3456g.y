@@ -118,10 +118,6 @@ optionalsignadd: OPER_SIGNADD
 			   | %empty
 			   ;
 
-ordconstant: optionalsignadd IDENTIFIER /* integer constant identifier */
-		   | optionalsignadd UINT
-		   ;
-
 constant: uconstant
 	    | OPER_SIGNADD UINT
 		| OPER_SIGNADD REAL
@@ -131,7 +127,7 @@ constant: uconstant
 
 realparameterscycle: COMMA expression realparameterscycle
 				   | COMMA IDENTIFIER /* variable */ realparameterscycle
-				   | % empty
+				   | %empty
 				   ;
 
 realparameters: expression realparameterscycle
@@ -142,9 +138,11 @@ functioninvocation: %empty
 				  | LPAR realparameters RPAR
 				  ;
 
-factor: uconstant
-      | IDENTIFIER /* variable */
-	  | IDENTIFIER /* function */ functioninvocation
+factor: UINT /* uconstant inlining */
+	  | REAL /* uconstant inlining */
+	  | STRING /* uconstant inlining */
+      | IDENTIFIER /* variable OR function OR uconstant inlining */ 
+	  | IDENTIFIER /* function */ LPAR realparameters RPAR
 	  | LPAR expression RPAR
 	  | NOT factor
 	  ;
@@ -169,10 +167,6 @@ expression: simpleexpression
 
 /* STATEMENT */
 
-variable: IDENTIFIER /* variable */
-        | IDENTIFIER DOT IDENTIFIER /* record.property (record access) */
-		;
-
 statementlabel: UINT COLON
 			  | %empty
 			  ;
@@ -180,12 +174,9 @@ statementlabel: UINT COLON
 statementcycle: statement SEMICOLON statementcycle
 			  | %empty
 			  ;
-fordirection: TO
-			| DOWNTO
-			;
 
-statementbody: variable ASSIGN expression
-			 | IDENTIFIER /* function */ ASSIGN expression
+statementbody: IDENTIFIER DOT IDENTIFIER /* record.property (record access) */ ASSIGN expression
+			 | IDENTIFIER /* function OR variable */ ASSIGN expression
 			 | IDENTIFIER /* procedure */ functioninvocation
 			 | GOTO UINT
 			 | BEGIN statementcycle END
@@ -193,7 +184,7 @@ statementbody: variable ASSIGN expression
 			 | IF expression /* boolean */ THEN statement ELSE statement
 			 | WHILE expression /* boolean */ DO statement
 			 | REPEAT statementcycle UNTIL expression /* boolean */
-			 | FOR IDENTIFIER /* ordinal type */ ASSIGN expression /* ordinal */ fordirection expression /* ordinal */ DO statement
+			 | FOR IDENTIFIER /* ordinal type */ ASSIGN expression /* ordinal */ FOR_DIRECTION expression /* ordinal */ DO statement
 			 | %empty
 			 ;
 
@@ -214,7 +205,7 @@ fieldlist: IDENTIFIER fieldlistidentifiercycle COLON type fieldlistcycle
 
 recordbody: %empty
 		  | fieldlist
-		  | fieldlist semicolon
+		  | fieldlist SEMICOLON
 		  ;
 
 type: IDENTIFIER /* ordinal type OR type OR structured type */
@@ -246,10 +237,6 @@ blocktypecycle: TYPE IDENTIFIER EQ type SEMICOLON blocktypecycle
 blocktype: TYPE IDENTIFIER EQ type SEMICOLON blocktypecycle
 		 | %empty
 		 ;
-
-blockvarcycle: IDENTIFIER EQ constant SEMICOLON blockvarcycle
-			   | %empty
-			   ;
 
 blockvar: VAR fieldlist
 		| %empty
@@ -307,7 +294,7 @@ blockpfunctions: blockpfunction blockpfunctions
 blockp: blocklabel blockconst blocktype blockvar blockpfunctions BEGIN statement blockstatementcycle END
      ;
 
-mlaskal: PROGRAM IDENTIFIER SEMICOLON block DOT
+mlaskal: PROGRAM IDENTIFIER SEMICOLON blockp DOT
 	   ;
 
 
