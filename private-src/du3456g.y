@@ -123,13 +123,8 @@ constant: uconstant
 
 realparameters: expression
 			  | expression COMMA realparameters
-			  | IDENTIFIER /* variable */
 			  | IDENTIFIER /* variable */ COMMA realparameters
 			  ;
-
-functioninvocation: %empty
-				  | LPAR realparameters RPAR
-				  ;
 
 factor: UINT /* uconstant inlining */
 	  | REAL /* uconstant inlining */
@@ -154,6 +149,10 @@ expression: simpleexpression
 		  ;
 
 /* STATEMENT */
+
+functioninvocation: %empty
+				  | LPAR realparameters RPAR
+				  ;
 
 statementlabel: UINT COLON
 			  | %empty
