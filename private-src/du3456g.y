@@ -106,10 +106,209 @@
 
 %%
 
-mlaskal:	    PROGRAM 
-		    IDENTIFIER 
-		    SEMICOLON 
+/* CONSTANT */
+
+uconstant: IDENTIFIER /* constant identifier */
+         | UINT
+		 | REAL
+		 | STRING
+		 ;
+
+optionalsignadd: OPER_SIGNADD
+			   | %empty
+			   ;
+
+ordconstant: optionalsignadd IDENTIFIER /* integer constant identifier */
+		   | optionalsignadd UINT
+		   ;
+
+constant: uconstant
+	    | OPER_SIGNADD UINT
+		| OPER_SIGNADD REAL
 		;
+
+/* EXPRESSION */
+
+realparameterscycle: COMMA expression realparameterscycle
+				   | COMMA IDENTIFIER /* variable */ realparameterscycle
+				   | % empty
+				   ;
+
+realparameters: expression realparameterscycle
+			  | IDENTIFIER /* variable */ realparameterscycle
+			  ;
+
+functioninvocation: %empty
+				  | LPAR realparameters RPAR
+				  ;
+
+factor: uconstant
+      | IDENTIFIER /* variable */
+	  | IDENTIFIER /* function */ functioninvocation
+	  | LPAR expression RPAR
+	  | NOT factor
+	  ;
+
+termcycle: OPER_MUL factor termcycle
+		 | %empty
+		 ;
+
+term: factor termcycle
+
+simpleexressioncycle: OPER_SIGNADD term simpleexressioncycle
+					| OR term simpleexressioncycle
+					| %empty
+					;
+
+simpleexpression: optionalsignadd term simpleexressioncycle
+				;
+
+expression: simpleexpression
+		  | simpleexpression OPER_REL simpleexpression
+		  ;
+
+/* STATEMENT */
+
+variable: IDENTIFIER /* variable */
+        | IDENTIFIER DOT IDENTIFIER /* record.property (record access) */
+		;
+
+statementlabel: UINT COLON
+			  | %empty
+			  ;
+
+statementcycle: statement SEMICOLON statementcycle
+			  | %empty
+			  ;
+fordirection: TO
+			| DOWNTO
+			;
+
+statementbody: variable ASSIGN expression
+			 | IDENTIFIER /* function */ ASSIGN expression
+			 | IDENTIFIER /* procedure */ functioninvocation
+			 | GOTO UINT
+			 | BEGIN statementcycle END
+			 | IF expression /* boolean */ THEN statement 
+			 | IF expression /* boolean */ THEN statement ELSE statement
+			 | WHILE expression /* boolean */ DO statement
+			 | REPEAT statementcycle UNTIL expression /* boolean */
+			 | FOR IDENTIFIER /* ordinal type */ ASSIGN expression /* ordinal */ fordirection expression /* ordinal */ DO statement
+			 | %empty
+			 ;
+
+statement: statementlabel statementbody
+		 ;
+
+/* TYPE */
+
+fieldlistidentifiercycle: COMMA IDENTIFIER fieldlistidentifiercycle
+						| %empty
+						;
+fieldlistcycle: SEMICOLON IDENTIFIER fieldlistidentifiercycle COLON type fieldlistcycle
+			  | %empty
+			  ;
+
+fieldlist: IDENTIFIER fieldlistidentifiercycle COLON type fieldlistcycle
+	     ;
+
+recordbody: %empty
+		  | fieldlist
+		  | fieldlist semicolon
+		  ;
+
+type: IDENTIFIER /* ordinal type OR type OR structured type */
+    | RECORD recordbody END
+	;
+
+/* BLOCK */
+
+blocklabelcycle: COLON UINT blocklabelcycle
+				| %empty
+				;
+
+blocklabel: LABEL UINT blocklabelcycle SEMICOLON
+	  | %empty
+	  ;
+
+blockconstcycle: IDENTIFIER EQ constant SEMICOLON blockconstcycle
+			   | %empty
+			   ;
+
+blockconst: CONST IDENTIFIER EQ constant SEMICOLON blockconstcycle
+		  | %empty
+		  ;
+
+blocktypecycle: TYPE IDENTIFIER EQ type SEMICOLON blocktypecycle
+			   | %empty
+			   ;
+
+blocktype: TYPE IDENTIFIER EQ type SEMICOLON blocktypecycle
+		 | %empty
+		 ;
+
+blockvarcycle: IDENTIFIER EQ constant SEMICOLON blockvarcycle
+			   | %empty
+			   ;
+
+blockvar: VAR fieldlist
+		| %empty
+		;
+
+blockstatementcycle: SEMICOLON statement blockstatementcycle
+				   | %empty
+				   ;
+
+block: blocklabel blockconst blocktype blockvar BEGIN statement blockstatementcycle END
+     ;
+
+/* FUNCTION HEADERS */
+
+formalparametersidentifiercycle: COMMA IDENTIFIER
+							   | %empty
+							   ;
+
+formalparametersvar: VAR
+				   | %empty
+				   ;
+
+formalparameter: formalparametersvar IDENTIFIER formalparametersidentifiercycle COLON IDENTIFIER /* type */
+			   ;
+
+formalparametercycle: SEMICOLON formalparameter formalparametercycle
+					| %empty
+					;
+
+formalparameters: formalparameter formalparametercycle
+				;
+
+formalparametersheader: %empty
+					  | LPAR formalparameters RPAR
+					  ;
+
+procedureheader: PROCEDURE IDENTIFIER formalparametersheader
+			   ;
+
+functionheader: FUNCTION IDENTIFIER formalparametersheader COLON IDENTIFIER /* scalar type */
+
+/* BLOCK P */
+
+blockpfunctionheader: functionheader
+					| procedureheader
+					;
+
+blockpfunction: blockpfunctionheader SEMICOLON block SEMICOLON
+			  ;
+
+blockpfunctions: blockpfunction blockpfunctions
+			   | %empty
+			   ;
+
+blockp: blocklabel blockconst blocktype blockvar blockpfunctions BEGIN statement blockstatementcycle END
+     ;
+
+mlaskal: PROGRAM IDENTIFIER SEMICOLON block DOT
+	   ;
 
 
 %%
