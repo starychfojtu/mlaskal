@@ -115,15 +115,71 @@
 
 /* CONSTANT */
 
-uconstant: IDENTIFIER /* constant identifier */
-         | UINT
-		 | REAL
-		 | STRING
-		 ;
+constant: IDENTIFIER EQ IDENTIFIER	{
+										auto symbol = ctx->tab->find_symbol($3);
+										if (symbol->kind() != SKIND_CONST) {
+											message(DUERR_NOTCONST, @3, *$3);
+										}
 
-constant: uconstant
-	    | OPER_SIGNADD UINT
-		| OPER_SIGNADD REAL
+										auto const_symbol = symbol->access_const();
+										auto type_cat = const_symbol->type()->cat();\
+										switch (type_cat) {
+											case TCAT_STR: {
+													auto str_value = const_symbol->access_str_const()->str_value();
+													auto fin_str_value = ctx->tab->ls_str().add(*str_value);
+													ctx->tab->add_const_str(@1, $1, fin_str_value);
+												}
+												break;
+											case TCAT_INT: {
+													auto int_value = const_symbol->access_int_const()->int_value();
+													auto fin_int_value = ctx->tab->ls_int().add(*int_value);
+													ctx->tab->add_const_int(@1, $1, fin_int_value);
+												}
+												break;
+											case TCAT_REAL: {
+													auto real_value = const_symbol->access_real_const()->real_value();
+													auto fin_real_value = ctx->tab->ls_real().add(*real_value);
+													ctx->tab->add_const_real(@1, $1, fin_real_value);
+												}
+												break;
+											default: {
+													auto bool_value = const_symbol->access_bool_const()->bool_value();
+													ctx->tab->add_const_bool(@1, $1, bool_value);
+												}
+												break;
+										}
+									}
+	    | IDENTIFIER EQ UINT	{
+									ctx->tab->add_const_int(@1, $1, $3);
+								}
+	    | IDENTIFIER EQ REAL	{
+									ctx->tab->add_const_real(@1, $1, $3);
+								}
+	    | IDENTIFIER EQ STRING	{
+									ctx->tab->add_const_str(@1, $1, $3);
+								}
+	    | IDENTIFIER EQ OPER_SIGNADD UINT	{
+												if($3 == mlc::DUTOKGE_OPER_SIGNADD::DUTOKGE_MINUS)
+												{
+													auto value = ctx->tab->ls_int().add(-(*$4));
+													ctx->tab->add_const_int(@1, $1, value);
+												}
+												else
+												{
+													ctx->tab->add_const_int(@1, $1, $4);
+												}
+											}
+		| IDENTIFIER EQ OPER_SIGNADD REAL	{
+												if($3 == mlc::DUTOKGE_OPER_SIGNADD::DUTOKGE_MINUS)
+												{
+													auto value = ctx->tab->ls_real().add(-(*$4));
+													ctx->tab->add_const_real(@1, $1, value);
+												}
+												else
+												{				
+													ctx->tab->add_const_real(@1, $1, $4);
+												}
+											}
 		;
 
 /* EXPRESSION */
@@ -132,9 +188,9 @@ realparameters: expression
 			  | expression COMMA realparameters
 			  ;
 
-factor: UINT /* uconstant inlining */
-	  | REAL /* uconstant inlining */
-	  | STRING /* uconstant inlining */
+factor: UINT 
+	  | REAL
+	  | STRING
       | IDENTIFIER /* variable OR function OR uconstant inlining */
 	  | IDENTIFIER /* function */ LPAR realparameters RPAR
 	  | LPAR expression RPAR
@@ -266,8 +322,8 @@ blocklabel: LABEL blocklabelcycle SEMICOLON
 	  | %empty
 	  ;
 
-blockconstcycle: IDENTIFIER EQ constant SEMICOLON
-			   | IDENTIFIER EQ constant SEMICOLON blockconstcycle
+blockconstcycle: constant SEMICOLON
+			   | constant SEMICOLON blockconstcycle
 			   ;
 
 blockconst: CONST blockconstcycle
