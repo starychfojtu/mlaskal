@@ -107,6 +107,7 @@
 
 %type<mlc::type_pointer> type
 %type<std::vector<mlc::ls_id_index>> identifiercycle
+%type<mlc::field_list_ptr> recordfieldlist
 
 %%
 
@@ -210,24 +211,43 @@ identifiercycle:	IDENTIFIER	{
 															$$ = ids;
 														}
 		       ;
-/* TODO: separate this from records */
-fieldlist: identifiercycle COLON type SEMICOLON fieldlist	{
+
+/* TODO: Move and rename */
+fieldlistvariabledeclaration:	identifiercycle COLON type	{
 																for(auto identifier: $1) {
 																	ctx->tab->add_var(@1, identifier, $3);
 																}
 															}
-		 | identifiercycle COLON type	{
-											for(auto identifier: $1) {
-												ctx->tab->add_var(@1, identifier, $3);
-											}
-										}
+
+fieldlist: fieldlistvariabledeclaration SEMICOLON fieldlist
+		 | fieldlistvariabledeclaration
 		 | %empty
 	     ;
+
+recordfieldlist:  identifiercycle COLON type SEMICOLON recordfieldlist	{
+																			auto list = mlc::create_field_list();
+																			for(auto id: $1) {
+																				list->append_field(id, $3);
+																			}
+																			list->append_and_kill($5);
+																			$$ = list;
+																		}
+				| identifiercycle COLON type	{
+													auto list = mlc::create_field_list();
+													for(auto id: $1) {
+														list->append_field(id, $3);
+													}
+													$$ = list;
+												}
+				| %empty
+				;
 
 type: IDENTIFIER /* ordinal type OR type OR structured type */ {
 																	$$ = mlc::get_type(ctx->tab, $1, @1);
 															   }
-    | RECORD fieldlist END
+    | RECORD recordfieldlist END	{
+										$$ = ctx->tab->create_record_type($2, @1);
+									}
 	;
 
 /* BLOCK */
