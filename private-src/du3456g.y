@@ -228,19 +228,19 @@ fieldlist: fieldlistvariabledeclaration SEMICOLON fieldlist
 
 recordfieldlist:  identifiercycle COLON type SEMICOLON recordfieldlist	{
 																			auto list = mlc::create_field_list();
-																			for(auto id: $1) {
+																			for (auto id: $1) {
 																				list->append_field(id, $3);
 																			}
 																			list->append_and_kill($5);
 																			$$ = list;
 																		}
-				| identifiercycle COLON type	{
-													auto list = mlc::create_field_list();
-													for(auto id: $1) {
-														list->append_field(id, $3);
-													}
-													$$ = list;
-												}
+				| identifiercycle COLON type SEMICOLON	{
+															auto list = mlc::create_field_list();
+															for (auto id: $1) {
+																list->append_field(id, $3);
+															}
+															$$ = list;
+														}
 				| %empty
 				;
 
@@ -274,8 +274,12 @@ blockconst: CONST blockconstcycle
 		  | %empty
 		  ;
 
-blocktypecycle: IDENTIFIER EQ type SEMICOLON
-			   | IDENTIFIER EQ type SEMICOLON blocktypecycle
+blocktypedeclaration: IDENTIFIER EQ type SEMICOLON	{
+														ctx->tab->add_type(@1, $1, $3);	
+													}
+
+blocktypecycle: blocktypedeclaration 
+			   | blocktypedeclaration blocktypecycle
 			   ;
 
 blocktype: TYPE blocktypecycle
