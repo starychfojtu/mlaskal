@@ -252,8 +252,12 @@ type: IDENTIFIER /* ordinal type OR type OR structured type */ {
 
 /* BLOCK */
 
-blocklabelcycle: UINT COMMA blocklabelcycle
-			   | UINT
+blocklabeldeclaration: UINT {
+								ctx->tab->add_label_entry(@1, $1, ctx->tab->new_label());
+							}
+
+blocklabelcycle: blocklabeldeclaration COMMA blocklabelcycle	
+			   | blocklabeldeclaration
 			   ;
 
 blocklabel: LABEL blocklabelcycle SEMICOLON
