@@ -17,6 +17,7 @@
 
 	// allow references to semantic types in %type
 #include "dutables.hpp"
+#include "du3456sem.hpp"
 
 	// avoid no-case warnings when compiling du3g.hpp
 #pragma warning (disable:4065)
@@ -103,6 +104,9 @@
 %token<mlc::DUTOKGE_OPER_SIGNADD> OPER_SIGNADD		    /* +, - */
 %token<mlc::DUTOKGE_OPER_MUL> OPER_MUL			    /* *, /, div, mod, and */
 %token<mlc::DUTOKGE_FOR_DIRECTION> FOR_DIRECTION		    /* to, downto */
+
+%type<mlc::type_pointer> type
+%type<std::vector<mlc::ls_id_index>> identifiercycle
 
 %%
 
@@ -197,22 +201,38 @@ statement: statementa
 
 /* TYPE */
 
-identifiercycle: IDENTIFIER 
-			   | identifiercycle COMMA IDENTIFIER
+identifiercycle:	IDENTIFIER	{
+									$$.push_back($1);
+								}
+				|	identifiercycle COMMA IDENTIFIER	{
+															auto ids = $1;
+															ids.push_back($3);
+															$$ = ids;
+														}
 		       ;
-
-fieldlist: identifiercycle COLON type SEMICOLON fieldlist
-		 | identifiercycle COLON type
+/* TODO: separate this from records */
+fieldlist: identifiercycle COLON type SEMICOLON fieldlist	{
+																for(auto identifier: $1) {
+																	ctx->tab->add_var(@1, identifier, $3);
+																}
+															}
+		 | identifiercycle COLON type	{
+											for(auto identifier: $1) {
+												ctx->tab->add_var(@1, identifier, $3);
+											}
+										}
 		 | %empty
 	     ;
 
-type: IDENTIFIER /* ordinal type OR type OR structured type */
+type: IDENTIFIER /* ordinal type OR type OR structured type */ {
+																	$$ = mlc::get_type(ctx->tab, $1, @1);
+															   }
     | RECORD fieldlist END
 	;
 
 /* BLOCK */
 
-blocklabelcycle: UINT COLON blocklabelcycle
+blocklabelcycle: UINT COMMA blocklabelcycle
 			   | UINT
 			   ;
 

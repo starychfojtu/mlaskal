@@ -45,8 +45,7 @@ namespace mlc {
 		return (int)(c - '0');
 	}
 
-	tuple<int, bool> str_to_int(const string s)
-	{
+	tuple<int, bool> str_to_int(const string s) {
 		int result = 0;
 		bool stripped = false;
 		for (auto c : s) {
@@ -57,6 +56,15 @@ namespace mlc {
 			result = new_result;
 		}
 		return make_tuple(result, stripped);
+	}
+
+	type_pointer get_type(symbol_tables* ctx, ls_id_index idx, int idx_line) {
+		auto type_ref = ctx->find_symbol(idx)->access_type();
+		if (!type_ref) {
+			message(DUERR_NOTTYPE, idx_line, *idx);
+		}
+
+		return type_ref->type();
 	}
 };
 

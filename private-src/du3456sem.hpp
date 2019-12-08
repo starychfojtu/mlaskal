@@ -30,6 +30,9 @@ namespace mlc {
 
 	// Boolean indicates whether or not the value was stripped.
 	tuple<int, bool> str_to_int(const string s);
+
+	// Retrieves type by identifier.
+	type_pointer get_type(symbol_tables* ctx, ls_id_index idx, int idx_line);
 }
 
 #endif
