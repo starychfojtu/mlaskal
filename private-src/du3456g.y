@@ -290,14 +290,9 @@ recordfieldlist:  identifiercycle COLON type SEMICOLON recordfieldlist	{
 																			list->append_and_kill($5);
 																			$$ = list;
 																		}
-				| identifiercycle COLON type SEMICOLON	{
-															auto list = mlc::create_field_list();
-															for (auto id: $1) {
-																list->append_field(id, $3);
-															}
-															$$ = list;
-														}
-				| %empty
+				| %empty	{
+								$$ = mlc::create_field_list();
+							}
 				;
 
 type: IDENTIFIER /* ordinal type OR type OR structured type */ {
