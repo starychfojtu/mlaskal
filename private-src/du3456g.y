@@ -109,6 +109,7 @@
 %type<std::vector<mlc::ls_id_index>> identifiercycle
 %type<mlc::field_list_ptr> recordfieldlist
 %type<mlc::parameter_list_ptr> formalparametercycle formalparameter formalparametersheader
+%type<mlc::ls_id_index> blockpfunctionheader procedureheader functionheader
 
 %%
 
@@ -331,18 +332,28 @@ formalparametersheader: %empty	{
 														}
 					  ;
 
-procedureheader: PROCEDURE IDENTIFIER formalparametersheader
+procedureheader: PROCEDURE IDENTIFIER formalparametersheader	{
+																	ctx->tab->add_proc(@1, $2, $3);
+																	$$ = $2;
+																}
 			   ;
 
-functionheader: FUNCTION IDENTIFIER formalparametersheader COLON IDENTIFIER /* scalar type */
+functionheader: FUNCTION IDENTIFIER formalparametersheader COLON IDENTIFIER /* scalar type */	{
+																									ctx->tab->add_fnc(@1, $2, mlc::get_type(ctx->tab, $5, @5), $3);
+																									$$ = $2;
+																								}
 
 /* BLOCK P */
 
-blockpfunctionheader: functionheader
-					| procedureheader
+blockpfunctionheader: functionheader	{
+											$$ = $1;
+										}
+					| procedureheader	{
+											$$ = $1;
+										}
 					;
 
-blockpfunction: blockpfunctionheader SEMICOLON block SEMICOLON
+blockpfunction: blockpfunctionheader SEMICOLON { ctx->tab->enter(@2, $1); } block { ctx->tab->leave(@4); } SEMICOLON
 			  ;
 
 blockpfunctions: blockpfunction blockpfunctions
