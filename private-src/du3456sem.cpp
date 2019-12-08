@@ -58,8 +58,8 @@ namespace mlc {
 		return make_tuple(result, stripped);
 	}
 
-	type_pointer get_type(symbol_tables* ctx, ls_id_index idx, int idx_line) {
-		auto type_ref = ctx->find_symbol(idx)->access_type();
+	type_pointer get_type(symbol_tables* tab, ls_id_index idx, int idx_line) {
+		auto type_ref = tab->find_symbol(idx)->access_type();
 		if (!type_ref) {
 			message(DUERR_NOTTYPE, idx_line, *idx);
 		}

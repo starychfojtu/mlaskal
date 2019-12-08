@@ -108,6 +108,7 @@
 %type<mlc::type_pointer> type
 %type<std::vector<mlc::ls_id_index>> identifiercycle
 %type<mlc::field_list_ptr> recordfieldlist
+%type<mlc::parameter_list_ptr> formalparametercycle formalparameter formalparametersheader
 
 %%
 
@@ -293,26 +294,41 @@ block: blocklabel blockconst blocktype blockvar BEGIN statement blockstatementcy
 
 /* FUNCTION HEADERS */
 
-formalparametersidentifiercycle: COMMA IDENTIFIER
-							   | %empty
-							   ;
-
-formalparametersvar: VAR
-				   | %empty
-				   ;
-
-formalparameter: formalparametersvar IDENTIFIER formalparametersidentifiercycle COLON IDENTIFIER /* type */
+formalparameter: VAR identifiercycle COLON IDENTIFIER /* type */	{
+																		auto list = mlc::create_parameter_list();
+																		auto type = mlc::get_type(ctx->tab, $4, @4);
+																		for(auto index : $2) {
+																			list->append_parameter_by_reference(index, type);
+																		}
+																		$$ = list;			
+																	}
+			   | identifiercycle COLON IDENTIFIER /* type */	{
+																	auto list = mlc::create_parameter_list();
+																	auto type = mlc::get_type(ctx->tab, $3, @3);
+																	for(auto index : $1) {
+																		list->append_parameter_by_value(index, type);
+																	}
+																	$$ = list;					
+																}
 			   ;
 
-formalparametercycle: SEMICOLON formalparameter formalparametercycle
-					| %empty
+formalparametercycle: formalparameter SEMICOLON formalparametercycle	{
+																			auto list = mlc::create_parameter_list();
+																			list->append_and_kill($1);
+																			list->append_and_kill($3);
+																			$$ = list;
+																		}
+					| formalparameter	{
+											$$ = $1;
+										}
 					;
 
-formalparameters: formalparameter formalparametercycle
-				;
-
-formalparametersheader: %empty
-					  | LPAR formalparameters RPAR
+formalparametersheader: %empty	{
+									$$ = mlc::create_parameter_list();
+								}
+					  | LPAR formalparametercycle RPAR	{
+															$$ = $2;
+														}
 					  ;
 
 procedureheader: PROCEDURE IDENTIFIER formalparametersheader

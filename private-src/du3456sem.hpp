@@ -32,7 +32,7 @@ namespace mlc {
 	tuple<int, bool> str_to_int(const string s);
 
 	// Retrieves type by identifier.
-	type_pointer get_type(symbol_tables* ctx, ls_id_index idx, int idx_line);
+	type_pointer get_type(symbol_tables* tab, ls_id_index idx, int idx_line);
 }
 
 #endif
